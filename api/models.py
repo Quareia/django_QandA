@@ -88,7 +88,7 @@ class UserInfo(models.Model):
     # 用户头像
     userimg = models.ImageField(default='', upload_to='userimages', blank=True)
     # 用户信息对应的User
-    owner = models.OneToOneField(to=User, related_name='info')
+    owner = models.OneToOneField(to=User, related_name='info', on_delete=models.CASCADE)
     # 用户所关注的问题
     followquestions = models.ManyToManyField(to=Question)
     # 用户关注的话题
