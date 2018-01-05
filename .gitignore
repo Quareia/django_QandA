@@ -4,4 +4,4 @@ db.sqlite3
 *.pyc
 api/__pycache__/
 QandA/__pycache__/
-00*
+00*.py
