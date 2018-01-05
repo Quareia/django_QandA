@@ -1,7 +1,7 @@
 .idea
 media
 db.sqlite3
-api/migrations/
+api/migrations/*.pyc
 api/__pycache__/
 QandA/__pycache__/
-*.pyc
+
