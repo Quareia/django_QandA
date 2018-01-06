@@ -79,10 +79,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
         try:
-            # ???
+            # js传递时使用不同的函数得到的结果不同
             topic = Topic.objects.get(pk=self.request.data['topic'])
             followers = topic.followers.all()
-            # print(followers)
             for item in followers:
                 message = Message.objects.create(destination=item.id,
                                                  content='topic ' + str(topic.id) + ' update',
@@ -110,4 +109,4 @@ class QuestionViewSet(viewsets.ModelViewSet):
                     lists.append(item)
             serializer = QuestionSerializer(lists, many=True)
             return Response(serializer.data)
-
+        return Response({'msg': 'no data'})

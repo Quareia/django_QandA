@@ -19,8 +19,8 @@ from rest_framework.schemas import get_schema_view
 from api.utils.staticfile import get_ans_img, get_user_img
 
 urlpatterns = [
-    url(r'^schema/$', get_schema_view(title='Pastebin API')),
     url(r'^auth/', include('rest_framework.urls')),
     url(r'^answers/media/(?P<name>.*)/$', get_ans_img),
+    url(r'^userinfos/[0-9]*/media/(?P<name>.*)/$', get_user_img),
     url(r'^', include('api.urls')),
 ]
