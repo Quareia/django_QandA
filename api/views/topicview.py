@@ -84,8 +84,11 @@ class TopicViewSet(viewsets.ModelViewSet):
             for item in topics:
                 if title in item.title:
                     lists.append(item)
-            serializer = TopicSerializer(lists, many=True)
-            return Response(serializer.data)
+            page = self.paginate_queryset(lists)
+            if page is not None:
+                serializer = TopicSerializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+        return Response({'msg': 'no data'})
 
     @list_route()
     def get_sel_topic(self, request):

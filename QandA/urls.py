@@ -14,11 +14,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
-from api.utils.staticfile import get_ans_img, get_user_img
+from api.utils.staticfile import get_img
 
 urlpatterns = [
     url(r'^auth/', include('rest_framework.urls')),
-    url(r'^answers/media/(?P<name>.*)/$', get_ans_img),
-    url(r'^userinfos/[0-9]*/media/(?P<name>.*)/$', get_user_img),
+    url(r'^media/(?P<name>.*)/$', get_img),
     url(r'^', include('api.urls')),
 ]

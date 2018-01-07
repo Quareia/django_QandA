@@ -9,11 +9,11 @@ class Topic(models.Model):
     # 话题创建者
     owner = models.ForeignKey(to=User, related_name='topics', on_delete=models.CASCADE)
     # 话题标题
-    title = models.CharField(blank=True, default='', max_length=50)
+    title = models.CharField(unique=True, max_length=50)
     # 话题搜索次数
-    searchtimes = models.IntegerField()
+    searchtimes = models.IntegerField(default=0)
     # 话题关键字
-    keywords = models.CharField(blank=True, default='', max_length=50)
+    keywords = models.CharField(default='未命名', max_length=50)
     # 话题的关注者,一个用户可以关注多个话题，一个话题可以被多个用户关注
     followers = models.ManyToManyField('UserInfo')
 
@@ -24,8 +24,8 @@ class Topic(models.Model):
 class Message(models.Model):
     # 消息发送时间
     created = models.DateTimeField(auto_now_add=True)
-    # 消息的发送者姓名
-    origin = models.CharField(max_length=20)
+    # 消息的发送者姓名, 空白为系统消息
+    origin = models.CharField(max_length=20, blank=True)
     # 消息的接收者姓名
     destination = models.CharField(max_length=20)
     # 消息的内容
@@ -45,13 +45,13 @@ class Question(models.Model):
     # 设置related-name在user的序列化时找到user拥有的question
     owner = models.ForeignKey(to=User, related_name='questions', on_delete=models.CASCADE)
     # 问题的标题
-    title = models.CharField(blank=True, default='', max_length=50)
+    title = models.CharField(unique=True, max_length=50)
     # 问题的内容
     description = models.TextField()
     # 所属话题
     topic = models.ForeignKey(to=Topic, related_name='questions', on_delete=models.CASCADE)
     # 问题的搜索次数
-    searchtimes = models.IntegerField()
+    searchtimes = models.IntegerField(default=0)
     # 问题的关注者,一个用户可以关注多个问题，一个问题可以被多个用户关注
     followers = models.ManyToManyField('UserInfo')
 

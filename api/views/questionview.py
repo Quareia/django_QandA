@@ -109,8 +109,10 @@ class QuestionViewSet(viewsets.ModelViewSet):
             for item in questions:
                 if title in item.title:
                     lists.append(item)
-            serializer = QuestionSerializer(lists, many=True)
-            return Response(serializer.data)
+            page = self.paginate_queryset(lists)
+            if page is not None:
+                serializer = QuestionSerializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
         return Response({'msg': 'no data'})
 
     @list_route()

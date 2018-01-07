@@ -19,8 +19,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
 class TopicSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
-    followers = serializers.PrimaryKeyRelatedField(many=True,
-                                                   queryset=UserInfo.objects.all())
+    followers = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     questions = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
@@ -66,8 +65,7 @@ class QuestionSerializer(serializers.ModelSerializer):
     # 问题所属话题(如果设置为只读就会出错，因为还没有，所以不能只读)
     topic = serializers.PrimaryKeyRelatedField(queryset=Topic.objects.all())
     # 问题的关注者
-    followers = serializers.PrimaryKeyRelatedField(many=True,
-                                                   queryset=UserInfo.objects.all())
+    followers = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Question
@@ -84,7 +82,7 @@ class SimQuestionSerializer(serializers.ModelSerializer):
 class AnswerSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
     ansto = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
-    # 设置required属性允许为空
+    # 设置required属性允许为空, 返回的图片url是根据请求的url再加上/media/...
     ansimage = serializers.ImageField(allow_empty_file=True, required=False)
 
     class Meta:
