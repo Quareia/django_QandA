@@ -23,10 +23,10 @@ class TopicViewSet(viewsets.ModelViewSet):
             topic = Topic.objects.get(pk=pk)
         except Topic.DoesNotExist:
             return Response({"msg": '话题不存在'})
-        topic.followers.add(request.user.id)
+        topic.followers.add(request.user.info)
 
         userinfo = UserInfo.objects.filter(owner=request.user)[0]
-        userinfo.followtopics.add(topic.id)
+        userinfo.followtopics.add(topic)
         userinfo.save()
         topic.save()
         return Response({"msg": '关注成功'})
@@ -37,10 +37,10 @@ class TopicViewSet(viewsets.ModelViewSet):
             topic = Topic.objects.get(pk=pk)
         except Topic.DoesNotExist:
             return Response({'msg': '话题不存在'})
-        topic.followers.remove(request.user.id)
+        topic.followers.remove(request.user.info)
         try:
             userinfo = UserInfo.objects.get(owner=request.user)
-            userinfo.followtopics.remove(topic.id)
+            userinfo.followtopics.remove(topic)
             userinfo.save()
             topic.save()
         except UserInfo.DoesNotExist:

@@ -2,7 +2,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from rest_framework import viewsets
-from api.serializers import UserSerializer, UserInfoSerializer
+from api.serializers import UserSerializer, UserInfoSerializer, TopicSerializer, QuestionSerializer
 from api.models import UserInfo
 from rest_framework.decorators import detail_route, list_route
 from api.serializers import ImageSerializer
@@ -51,3 +51,33 @@ class UserInfoViewSet(viewsets.ModelViewSet):
             info.save()
             return Response({'msg': 'upload user img successful'})
         return Response({'msg': 'upload user img fail'})
+
+    @detail_route()
+    def my_follow_topics(self, request, pk=None):
+        try:
+            info = UserInfo.objects.get(pk=pk)
+        except UserInfo.DoesNotExist:
+            return Response({'msg': 'user info does not exist'})
+        topics = info.followtopics.all()
+        page = self.paginate_queryset(topics)
+        if page is not None:
+            serializer = TopicSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = TopicSerializer(topics, many=True)
+        return Response(serializer.data)
+
+    @detail_route()
+    def my_follow_questions(self, request, pk=None):
+        try:
+            info = UserInfo.objects.get(pk=pk)
+        except UserInfo.DoesNotExist:
+            return Response({'msg': 'user info does not exist'})
+        questions = info.followquestions.all()
+        page = self.paginate_queryset(questions)
+        if page is not None:
+            serializer = QuestionSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = QuestionSerializer(questions, many=True)
+        return Response(serializer.data)

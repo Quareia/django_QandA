@@ -71,6 +71,11 @@ class AnswerViewSet(viewsets.ModelViewSet):
         try:
             # js append become list
             question = Question.objects.get(pk=self.request.data['ansto'])
+            question.followers.add(self.request.user.info)
+            info = UserInfo.objects.filter(owner=self.request.user)[0]
+            info.followquestions.add(question)
+            question.save()
+            info.save()
             followers = question.followers.all()
             for item in followers:
                 message = Message.objects.create(destination=item.id,

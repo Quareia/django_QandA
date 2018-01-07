@@ -44,3 +44,5 @@ Userinfo
 
 * /api/userinfos/[pk]/upload_image/:为id为pk的用户上传头像
 * /api/userinfos/[pk]/:获取id为pk的用户的信息
+* /api/userinfos/[pk]/my_follow_topics/:获取id为pk的用户关注的话题
+* /api/userinfos/[pk]/my_follow_questions/:获取id为pk的用户关注 的问题

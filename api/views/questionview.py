@@ -32,7 +32,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def my_questions(self, request):
         # 使用序列化类序列化时，将对象当作data传入，而获取时，直接将对象传入
         # 可以控制返回的顺序
-        questions = Question.objects.filter(owner=request.user.id).order_by('created',)
+        questions = Question.objects.filter(owner=request.user).order_by('created',)
         page = self.paginate_queryset(questions)
         if page is not None:
             serializer = QuestionSerializer(page, many=True)
@@ -59,10 +59,10 @@ class QuestionViewSet(viewsets.ModelViewSet):
             question = Question.objects.get(pk=pk)
         except Question.DoesNotExist:
             return Response({"msg": '问题不存在'})
-        question.followers.add(request.user.id)
+        question.followers.add(request.user.info)
 
         userinfo = UserInfo.objects.filter(owner=request.user)[0]
-        userinfo.followquestions.add(question.id)
+        userinfo.followquestions.add(question)
         userinfo.save()
         question.save()
         return Response({"msg": '关注成功'})
@@ -73,10 +73,10 @@ class QuestionViewSet(viewsets.ModelViewSet):
             question = Question.objects.get(pk=pk)
         except Question.DoesNotExist:
             return Response({'msg': '问题不存在'})
-        question.followers.remove(request.user.id)
+        question.followers.remove(request.user.info)
         try:
             userinfo = UserInfo.objects.get(owner=request.user)
-            userinfo.followquestions.remove(question.id)
+            userinfo.followquestions.remove(question)
             userinfo.save()
             question.save()
         except UserInfo.DoesNotExist:
