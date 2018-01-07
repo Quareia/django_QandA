@@ -43,9 +43,9 @@ class UserInfoViewSet(viewsets.ModelViewSet):
 
     @detail_route(methods=['POST'])
     def upload_image(self, request, pk=None):
-        seri = ImageSerializer(data=request.data)
-        if seri.is_valid():
-            img = seri.validated_data['ansimg']
+        serializer = ImageSerializer(data=request.data)
+        if serializer.is_valid():
+            img = serializer.validated_data['ansimg']
             info = UserInfo.objects.get(pk=pk)
             info.userimg = img
             info.save()

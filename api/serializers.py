@@ -29,7 +29,7 @@ class TopicSerializer(serializers.ModelSerializer):
                   'questions', 'created')
 
 
-class SelTopicSerializer(serializers.ModelSerializer):
+class SimTopicSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topic
         fields = ('id', 'title')
@@ -75,6 +75,12 @@ class QuestionSerializer(serializers.ModelSerializer):
                   'answers', 'followers', 'created')
 
 
+class SimQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = ('id', 'title')
+
+
 class AnswerSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
     ansto = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
@@ -89,3 +95,6 @@ class AnswerSerializer(serializers.ModelSerializer):
 
 class ImageSerializer(serializers.Serializer):
     ansimg = serializers.ImageField(default='')
+
+
+

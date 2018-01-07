@@ -2,7 +2,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from rest_framework import viewsets
-from api.serializers import UserSerializer, TopicSerializer, QuestionSerializer, AnswerSerializer, MessageSerializer, UserInfoSerializer
+from api.serializers import UserSerializer, TopicSerializer, QuestionSerializer, AnswerSerializer, MessageSerializer, UserInfoSerializer, SimQuestionSerializer
 from api.models import Topic, Question, Answer, Message, UserInfo
 from rest_framework.decorators import detail_route, list_route
 # Create your views here.
@@ -64,15 +64,24 @@ class QuestionViewSet(viewsets.ModelViewSet):
         userinfo = UserInfo.objects.filter(owner=request.user)[0]
         userinfo.followquestions.add(question.id)
         userinfo.save()
-
-        serializer = QuestionSerializer(data=question)
-        if serializer.is_valid():
-            serializer.save()
+        question.save()
         return Response({"msg": '关注成功'})
 
     @detail_route()
     def cancel_follow(self, request, pk=None):
-        pass
+        try:
+            question = Question.objects.get(pk=pk)
+        except Question.DoesNotExist:
+            return Response({'msg': '问题不存在'})
+        question.followers.remove(request.user.id)
+        try:
+            userinfo = UserInfo.objects.get(owner=request.user)
+            userinfo.followquestions.remove(question.id)
+            userinfo.save()
+            question.save()
+        except UserInfo.DoesNotExist:
+            return Response({'msg': '用户不存在'})
+        return Response({'msg': '取消关注成功'})
 
     # 在问题发生改变时，应该通知关注此问题的用户，
     # 通过消息来传送
@@ -90,13 +99,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
         except Topic.DoesNotExist:
             return Response({'status': 'topic does not exist'})
 
-    # 定义更新的操作
-    # def perform_update(self, serializer):
-    #     serializer.save()
-    #     # 通知所有此问题的关注者，问题发生了更新，在消息中添加
-    #     # 系统消息，目的地为关注者，内容是您关注的问题更新了
-    #     return Response({"status": 'update ok'})
-
     @list_route()
     def search(self, request):
         # 搜索问题可以根据标题
@@ -110,3 +112,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
             serializer = QuestionSerializer(lists, many=True)
             return Response(serializer.data)
         return Response({'msg': 'no data'})
+
+    @list_route()
+    def get_hot_question(self, request):
+        questions = Question.objects.order_by('searchtimes')[:10]
+        serializer = SimQuestionSerializer(questions, many=True)
+        return Response(serializer.data)

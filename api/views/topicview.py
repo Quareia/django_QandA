@@ -5,7 +5,7 @@ from rest_framework import viewsets
 from api.serializers import UserSerializer, TopicSerializer, QuestionSerializer, AnswerSerializer, MessageSerializer, UserInfoSerializer
 from api.models import Topic, Question, Answer, Message, UserInfo
 from rest_framework.decorators import detail_route, list_route
-from api.serializers import SelTopicSerializer
+from api.serializers import SimTopicSerializer
 
 
 class TopicViewSet(viewsets.ModelViewSet):
@@ -28,15 +28,24 @@ class TopicViewSet(viewsets.ModelViewSet):
         userinfo = UserInfo.objects.filter(owner=request.user)[0]
         userinfo.followtopics.add(topic.id)
         userinfo.save()
-
-        serializer = QuestionSerializer(data=topic)
-        if serializer.is_valid():
-            serializer.save()
+        topic.save()
         return Response({"msg": '关注成功'})
 
     @detail_route()
     def cancel_follow(self, request, pk=None):
-        pass
+        try:
+            topic = Topic.objects.get(pk=pk)
+        except Topic.DoesNotExist:
+            return Response({'msg': '话题不存在'})
+        topic.followers.remove(request.user.id)
+        try:
+            userinfo = UserInfo.objects.get(owner=request.user)
+            userinfo.followtopics.remove(topic.id)
+            userinfo.save()
+            topic.save()
+        except UserInfo.DoesNotExist:
+            return Response({'msg': '用户不存在'})
+        return Response({'msg': '取消关注成功'})
 
     # 获取特定信息列表时用list_route修饰,访问时使用[@]/[function_name]/来使用,可在装饰器中添加允许的方法
     @list_route()
@@ -79,8 +88,14 @@ class TopicViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
     @list_route()
-    def get_seltopic(self, request):
-        topic = Topic.objects.all()
-        seri = SelTopicSerializer(topic, many=True)
-        return Response(seri.data)
+    def get_sel_topic(self, request):
+        topics = Topic.objects.all()
+        serializer = SimTopicSerializer(topics, many=True)
+        return Response(serializer.data)
 
+    @list_route()
+    # 根据搜索次数添加热门话题
+    def get_hot_topic(self, request):
+        topics = Topic.objects.order_by('searchtimes')[:10]
+        serializer = SimTopicSerializer(topics, many=True)
+        return Response(serializer.data)
