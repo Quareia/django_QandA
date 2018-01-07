@@ -5,6 +5,7 @@ from rest_framework import viewsets
 from api.serializers import UserSerializer, TopicSerializer, QuestionSerializer, AnswerSerializer, MessageSerializer, UserInfoSerializer, SimQuestionSerializer
 from api.models import Topic, Question, Answer, Message, UserInfo
 from rest_framework.decorators import detail_route, list_route
+from api.utils.message_send import MessageSender
 # Create your views here.
 
 
@@ -17,6 +18,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     serializer_class = QuestionSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
+    # 用户点击问题详情时增加搜索次数
     @detail_route()
     def add_search_times(self, request, pk=None):
         try:
@@ -91,11 +93,8 @@ class QuestionViewSet(viewsets.ModelViewSet):
             # js传递时使用不同的函数得到的结果不同
             topic = Topic.objects.get(pk=self.request.data['topic'])
             followers = topic.followers.all()
-            for item in followers:
-                message = Message.objects.create(destination=item.id,
-                                                 content='topic ' + str(topic.id) + ' update',
-                                                 type=1)
-                message.save()
+            sender = MessageSender(followers, 'question ' + str(topic.id))
+            sender.start()
         except Topic.DoesNotExist:
             return Response({'status': 'topic does not exist'})
 
@@ -104,12 +103,8 @@ class QuestionViewSet(viewsets.ModelViewSet):
         # 搜索问题可以根据标题
         title = request.query_params.get('title', None)
         if title is not None:
-            questions = Question.objects.all()
-            lists = []
-            for item in questions:
-                if title in item.title:
-                    lists.append(item)
-            page = self.paginate_queryset(lists)
+            questions = Question.objects.filter(title__icontains=title)
+            page = self.paginate_queryset(questions)
             if page is not None:
                 serializer = QuestionSerializer(page, many=True)
                 return self.get_paginated_response(serializer.data)

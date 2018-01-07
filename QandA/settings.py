@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'api'
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -127,3 +127,4 @@ REST_FRAMEWORK = {
 MEDIA_ROOT = 'media/'
 
 MEDIA_URL = 'media/'
+

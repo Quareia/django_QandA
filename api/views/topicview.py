@@ -79,12 +79,10 @@ class TopicViewSet(viewsets.ModelViewSet):
         # 搜索话题可以根据关键字或者标题
         title = request.query_params.get('title', None)
         if title is not None:
-            topics = Topic.objects.all()
-            lists = []
-            for item in topics:
-                if title in item.title:
-                    lists.append(item)
-            page = self.paginate_queryset(lists)
+            # 不区分大小写的查询
+            lists1 = Topic.objects.filter(title__icontains=title)
+            lists2 = Topic.objects.filter(keywords__icontains=title)
+            page = self.paginate_queryset(lists1.union(lists2))
             if page is not None:
                 serializer = TopicSerializer(page, many=True)
                 return self.get_paginated_response(serializer.data)

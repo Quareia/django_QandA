@@ -17,9 +17,6 @@ class Topic(models.Model):
     # 话题的关注者,一个用户可以关注多个话题，一个话题可以被多个用户关注
     followers = models.ManyToManyField('UserInfo')
 
-    class Meta:
-        ordering = ('created',)
-
 
 class Message(models.Model):
     # 消息发送时间

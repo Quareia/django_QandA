@@ -7,6 +7,7 @@ from api.serializers import UserSerializer, TopicSerializer, QuestionSerializer,
 from api.models import Topic, Question, Answer, Message, UserInfo
 from rest_framework.decorators import detail_route, list_route
 from api.serializers import ImageSerializer
+from api.utils.message_send import MessageSender
 # Create your views here.
 
 
@@ -71,17 +72,14 @@ class AnswerViewSet(viewsets.ModelViewSet):
         try:
             # js append become list
             question = Question.objects.get(pk=self.request.data['ansto'])
-            question.followers.add(self.request.user.info)
             info = UserInfo.objects.filter(owner=self.request.user)[0]
+            followers = question.followers.all()
+            sender = MessageSender(followers, 'question ' + str(question.id))
+            sender.start()
+            question.followers.add(self.request.user.info)
             info.followquestions.add(question)
             question.save()
             info.save()
-            followers = question.followers.all()
-            for item in followers:
-                message = Message.objects.create(destination=item.id,
-                                                 content='question ' + str(question.id) + ' update',
-                                                 type=1)
-                message.save()
         except Question.DoesNotExist:
             return Response({'status': 'question does not exist'})
 
