@@ -5,7 +5,6 @@ from rest_framework import viewsets
 from api.serializers import UserSerializer, UserInfoSerializer, TopicSerializer, QuestionSerializer
 from api.models import UserInfo
 from rest_framework.decorators import detail_route, list_route
-from api.serializers import ImageSerializer
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -41,16 +40,16 @@ class UserInfoViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-    @detail_route(methods=['POST'])
-    def upload_image(self, request, pk=None):
-        serializer = ImageSerializer(data=request.data)
-        if serializer.is_valid():
-            img = serializer.validated_data['ansimg']
-            info = UserInfo.objects.get(pk=pk)
-            info.userimg = img
-            info.save()
-            return Response({'msg': 'upload user img successful'})
-        return Response({'msg': 'upload user img fail'})
+    # @detail_route(methods=['POST'])
+    # def upload_image(self, request, pk=None):
+    #     serializer = ImageSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         img = serializer.validated_data['ansimg']
+    #         info = UserInfo.objects.get(pk=pk)
+    #         info.userimg = img
+    #         info.save()
+    #         return Response({'msg': 'upload user img successful'})
+    #     return Response({'msg': 'upload user img fail'})
 
     @detail_route()
     def my_follow_topics(self, request, pk=None):

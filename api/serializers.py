@@ -88,11 +88,11 @@ class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
         fields = ('id', 'ansto', 'owner', 'description', 'ansimage', 'created',
-                  'ansagree', 'ansagainst')
+                  'ansagree', 'ansagainst', 'keep')
 
-
-class ImageSerializer(serializers.Serializer):
-    ansimg = serializers.ImageField(default='')
+#
+# class ImageSerializer(serializers.Serializer):
+#     ansimg = serializers.ImageField(default='')
 
 
 

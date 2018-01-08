@@ -71,6 +71,8 @@ class Answer(models.Model):
     ansagree = models.IntegerField(default=0)
     # 回答反对
     ansagainst = models.IntegerField(default=0)
+    # 确保回答的唯一
+    keep = models.CharField(default='', max_length=100)
 
     class Meta:
         ordering = ('created',)

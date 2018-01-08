@@ -44,7 +44,8 @@ def create_answer():
         question = random.choice(Question.objects.all())
         answer = Answer.objects.create(owner=user,
                                        ansto=question,
-                                       description=title,)
+                                       description=title,
+                                       keep=user.username + str(question.id))
         answer.save()
 
 

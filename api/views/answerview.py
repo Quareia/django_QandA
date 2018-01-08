@@ -6,7 +6,6 @@ from rest_framework import viewsets
 from api.serializers import UserSerializer, TopicSerializer, QuestionSerializer, AnswerSerializer, MessageSerializer, UserInfoSerializer
 from api.models import Topic, Question, Answer, Message, UserInfo
 from rest_framework.decorators import detail_route, list_route
-from api.serializers import ImageSerializer
 from api.utils.message_send import MessageSender
 # Create your views here.
 
@@ -20,17 +19,17 @@ class AnswerViewSet(viewsets.ModelViewSet):
     serializer_class = AnswerSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-    @detail_route(methods=['POST'])
-    def upload_image(self, request, pk=None):
-        seri = ImageSerializer(data=request.data)
-        if seri.is_valid():
-            # 前端发送时的图片名称需要一致
-            img = seri.validated_data['ansimg']
-            answer = Answer.objects.get(pk=pk)
-            answer.ansimage = img
-            answer.save()
-            return Response({'msg': 'upload img successful'})
-        return Response({'msg': 'upload img fail'})
+    # @detail_route(methods=['POST'])
+    # def upload_image(self, request, pk=None):
+    #     seri = ImageSerializer(data=request.data)
+    #     if seri.is_valid():
+    #         # 前端发送时的图片名称需要一致
+    #         img = seri.validated_data['ansimg']
+    #         answer = Answer.objects.get(pk=pk)
+    #         answer.ansimage = img
+    #         answer.save()
+    #         return Response({'msg': 'upload img successful'})
+    #     return Response({'msg': 'upload img fail'})
 
     #  点赞
     @detail_route()
@@ -66,9 +65,23 @@ class AnswerViewSet(viewsets.ModelViewSet):
         serializer = AnswerSerializer(answers, many=True)
         return Response(serializer.data)
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if(self.perform_create(serializer) == 1):
+            return Response({'msg': '您已经回答过此问题', 'status': 0})
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=201, headers=headers)
+
     # 模型的外键需要自己添加
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+        if Answer.objects.filter(keep=self.request.user.username +
+                                 str(self.request.data['ansto'])).count() == 0:
+            serializer.save(keep=self.request.user.username +
+                                 str(self.request.data['ansto']))
+        else:
+            return 1
         try:
             # js append become list
             question = Question.objects.get(pk=self.request.data['ansto'])
