@@ -34,7 +34,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def my_questions(self, request):
         # 使用序列化类序列化时，将对象当作data传入，而获取时，直接将对象传入
         # 可以控制返回的顺序
-        questions = Question.objects.filter(owner=request.user).order_by('created',)
+        questions = self.request.user.questions.all().order_by('created',)
         page = self.paginate_queryset(questions)
         if page is not None:
             serializer = QuestionSerializer(page, many=True)
@@ -46,10 +46,12 @@ class QuestionViewSet(viewsets.ModelViewSet):
     # 获取当前问题的所有回答
     @detail_route()
     def get_answers(self, request, pk=None):
-        answers = Answer.objects.filter(ansto=pk)
+        question = Question.objects.get(pk=pk)
+        answers = question.answers.all()
         page = self.paginate_queryset(answers)
         if page is not None:
-            serializer = AnswerSerializer(page, many=True)
+            serializer = AnswerSerializer(page, many=True,
+                                          context={'request': request})
             return self.get_paginated_response(serializer.data)
 
         serializer = AnswerSerializer(answers, many=True)

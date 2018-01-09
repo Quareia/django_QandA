@@ -66,7 +66,7 @@ class Answer(models.Model):
     # 回答的内容
     description = models.TextField()
     # 回答的图片
-    ansimage = models.ImageField(default='', upload_to='images', blank=True, null=True)
+    # ansimage = models.ManyToManyField('AnswerImage')
     # 回答点赞
     ansagree = models.IntegerField(default=0)
     # 回答反对
@@ -76,6 +76,13 @@ class Answer(models.Model):
 
     class Meta:
         ordering = ('created',)
+
+
+# 处理回答中的图片,回答时每加入一张图片就上传，在答案中保存图片的链接
+class AnswerImage(models.Model):
+    owner = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    to = models.ForeignKey(to=Answer, related_name='ansimage', on_delete=models.CASCADE)
+    image = models.ImageField(default='', upload_to='images', blank=True)
 
 
 class UserInfo(models.Model):

@@ -50,7 +50,7 @@ class TopicViewSet(viewsets.ModelViewSet):
     # 获取特定信息列表时用list_route修饰,访问时使用[@]/[function_name]/来使用,可在装饰器中添加允许的方法
     @list_route()
     def my_topics(self, request):
-        topics = Topic.objects.filter(owner=request.user)
+        topics = self.request.user.topics.all()
         page = self.paginate_queryset(topics)
         if page is not None:
             serializer = TopicSerializer(page, many=True)
@@ -65,7 +65,8 @@ class TopicViewSet(viewsets.ModelViewSet):
     # 获取话题下所有问题
     @detail_route()
     def get_questions(self, request, pk=None):
-        questions = Question.objects.filter(topic=pk)
+        topic = Topic.objects.get(pk=pk)
+        questions = topic.questions.all()
         page = self.paginate_queryset(questions)
         if page is not None:
             serializer = QuestionSerializer(page, many=True)

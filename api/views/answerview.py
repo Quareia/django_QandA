@@ -3,8 +3,9 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from rest_framework import viewsets
-from api.serializers import UserSerializer, TopicSerializer, QuestionSerializer, AnswerSerializer, MessageSerializer, UserInfoSerializer
-from api.models import Topic, Question, Answer, Message, UserInfo
+from api.serializers import UserSerializer, TopicSerializer, QuestionSerializer
+from api.serializers import AnswerSerializer, MessageSerializer, UserInfoSerializer, AnswerImageSerializer
+from api.models import Topic, Question, Answer, Message, UserInfo, AnswerImage
 from rest_framework.decorators import detail_route, list_route
 from api.utils.message_send import MessageSender
 # Create your views here.
@@ -19,17 +20,17 @@ class AnswerViewSet(viewsets.ModelViewSet):
     serializer_class = AnswerSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-    # @detail_route(methods=['POST'])
-    # def upload_image(self, request, pk=None):
-    #     seri = ImageSerializer(data=request.data)
-    #     if seri.is_valid():
-    #         # 前端发送时的图片名称需要一致
-    #         img = seri.validated_data['ansimg']
-    #         answer = Answer.objects.get(pk=pk)
-    #         answer.ansimage = img
-    #         answer.save()
-    #         return Response({'msg': 'upload img successful'})
-    #     return Response({'msg': 'upload img fail'})
+    @detail_route(methods=['POST'])
+    def upload_image(self, request, pk=None):
+        serializer = AnswerImageSerializer(data=request.data)
+        if serializer.is_valid():
+            # 前端发送时的图片名称需要一致
+            answer = Answer.objects.get(pk=pk)
+            serializer.save(owner=self.request.user, to=answer)
+            img = AnswerImage.objects.get(pk=serializer.data['id'])
+            answer.ansimage.add(img)
+            return Response(serializer.data)
+        return Response({'msg': 'upload img fail', 'status': 0})
 
     #  点赞
     @detail_route()

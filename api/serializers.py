@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from api.models import Topic, Question, Answer, Message, UserInfo
+from api.models import Topic, Question, Answer, Message, UserInfo, AnswerImage
 
 
 class UserInfoSerializer(serializers.ModelSerializer):
@@ -71,7 +71,8 @@ class QuestionSerializer(serializers.ModelSerializer):
     # 问题的提出者，保存 name
     owner = serializers.ReadOnlyField(source='owner.username')
     # 问题所属话题(如果设置为只读就会出错，因为还没有，所以不能只读)
-    topic = serializers.PrimaryKeyRelatedField(queryset=Topic.objects.all())
+    # topic = serializers.PrimaryKeyRelatedField(queryset=Topic.objects.all())
+    topic = SimTopicSerializer()
     # 问题的关注者
     followers = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
@@ -91,20 +92,35 @@ class AnswerSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
     ansto = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
     # 设置required属性允许为空, 返回的图片url是根据请求的url再加上/media/...
-    ansimage = serializers.ImageField(allow_empty_file=True, required=False)
-    # 此处返回请求的url
-    ansimage_url = serializers.SerializerMethodField()
-
-    def get_ansimage_url(self, obj):
-        if obj.ansimage:
-            return obj.ansimage.url
-        else:
-            return None
+    # ansimage = serializers.SlugRelatedField(
+    #     many=True,
+    #     read_only=True,
+    #     slug_field='image'
+    # )
+    # 使用slug时image是图片无法用utf-8解码
+    ansimage = serializers.HyperlinkedRelatedField(
+        many=True,
+        read_only=True,
+        view_name='answerimage-detail'
+    )
 
     class Meta:
         model = Answer
         fields = ('id', 'ansto', 'owner', 'description', 'ansimage', 'created',
-                  'ansagree', 'ansagainst', 'keep', 'ansimage_url')
+                  'ansagree', 'ansagainst', 'keep')
 
 
+class AnswerImageSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField()
+    image_url = serializers.SerializerMethodField()
+    owner = serializers.ReadOnlyField(source='owner.username')
 
+    def get_image_url(self, obj):
+        if obj.image:
+            return obj.image.url
+        else:
+            return None
+
+    class Meta:
+        model = AnswerImage
+        fields = ('id', 'image', 'owner', 'image_url')

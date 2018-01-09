@@ -6,6 +6,7 @@ from api.views.answerview import AnswerViewSet
 from api.views.messageview import MessageViewSet
 from api.views.loginview import LogoutView, LoginView
 from django.conf.urls import url, include
+from api.views.answerimageview import AnswerImageViewSet
 
 router = DefaultRouter()
 router.register(r'messages', MessageViewSet)
@@ -14,6 +15,7 @@ router.register(r'questions', QuestionViewSet)
 router.register(r'answers', AnswerViewSet)
 router.register(r'topics', TopicViewSet)
 router.register(r'userinfos', UserInfoViewSet)
+router.register(r'answerimages', AnswerImageViewSet)
 
 urlpatterns = [
     url(r'login/', LoginView.as_view()),
