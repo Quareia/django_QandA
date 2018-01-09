@@ -10,11 +10,19 @@ class UserInfoSerializer(serializers.ModelSerializer):
     followtopics = serializers.PrimaryKeyRelatedField(many=True,
                                                       queryset=Topic.objects.all())
     userimg = serializers.ImageField(allow_empty_file=True, required=False)
+    # 返回/media的路径
+    userimg_url = serializers.SerializerMethodField()
+
+    def get_userimg_url(self, obj):
+        if obj.userimg:
+            return obj.userimg.url
+        else:
+            return None
 
     class Meta:
         model = UserInfo
         fields = ('id', 'owner', 'followquestions', 'followtopics', 'something',
-                  'userimg')
+                  'userimg', 'userimg_url')
 
 
 class TopicSerializer(serializers.ModelSerializer):
@@ -84,15 +92,19 @@ class AnswerSerializer(serializers.ModelSerializer):
     ansto = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
     # 设置required属性允许为空, 返回的图片url是根据请求的url再加上/media/...
     ansimage = serializers.ImageField(allow_empty_file=True, required=False)
+    # 此处返回请求的url
+    ansimage_url = serializers.SerializerMethodField()
+
+    def get_ansimage_url(self, obj):
+        if obj.ansimage:
+            return obj.ansimage.url
+        else:
+            return None
 
     class Meta:
         model = Answer
         fields = ('id', 'ansto', 'owner', 'description', 'ansimage', 'created',
-                  'ansagree', 'ansagainst', 'keep')
-
-#
-# class ImageSerializer(serializers.Serializer):
-#     ansimg = serializers.ImageField(default='')
+                  'ansagree', 'ansagainst', 'keep', 'ansimage_url')
 
 
 
