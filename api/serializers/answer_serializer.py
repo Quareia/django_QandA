@@ -22,22 +22,16 @@ class ReturnAnswerSerializer(serializers.ModelSerializer):
 class AnswerSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
     ansto = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
-    ansimage = serializers.HyperlinkedRelatedField(
-        many=True,
-        read_only=True,
-        view_name='answerimage-detail'
-    )
 
     class Meta:
         model = Answer
-        fields = ('id', 'ansto', 'owner', 'description', 'ansimage', 'created',
+        fields = ('id', 'ansto', 'owner', 'description', 'created',
                   'ansagree', 'ansagainst', 'keep')
 
 
 class AnswerImageSerializer(serializers.ModelSerializer):
     image = serializers.ImageField()
     image_url = serializers.SerializerMethodField()
-    owner = serializers.ReadOnlyField(source='owner.username')
 
     def get_image_url(self, obj):
         if obj.image:
@@ -47,4 +41,4 @@ class AnswerImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AnswerImage
-        fields = ('id', 'image', 'owner', 'image_url')
+        fields = ('id', 'image', 'image_url')

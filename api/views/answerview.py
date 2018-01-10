@@ -25,18 +25,6 @@ class AnswerViewSet(viewsets.ModelViewSet):
         else:
             return AnswerSerializer
 
-    @detail_route(methods=['POST'])
-    def upload_image(self, request, pk=None):
-        serializer = AnswerImageSerializer(data=request.data)
-        if serializer.is_valid():
-            # 前端发送时的图片名称需要一致
-            answer = Answer.objects.get(pk=pk)
-            serializer.save(owner=self.request.user, to=answer)
-            img = AnswerImage.objects.get(pk=serializer.data['id'])
-            answer.ansimage.add(img)
-            return Response(serializer.data)
-        return Response({'msg': 'upload img fail', 'status': 0})
-
     #  点赞
     @detail_route()
     def agree_answer(self, request, pk=None):

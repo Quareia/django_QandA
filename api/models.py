@@ -80,8 +80,6 @@ class Answer(models.Model):
 
 # 处理回答中的图片,回答时每加入一张图片就上传，在答案中保存图片的链接
 class AnswerImage(models.Model):
-    owner = models.ForeignKey(to=User, on_delete=models.CASCADE)
-    to = models.ForeignKey(to=Answer, related_name='ansimage', on_delete=models.CASCADE)
     image = models.ImageField(default='', upload_to='images', blank=True)
 
 
