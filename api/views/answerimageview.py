@@ -1,6 +1,6 @@
 from rest_framework import permissions
 from rest_framework import viewsets
-from api.serializers import AnswerImageSerializer
+from api.serializers.answer_serializer import AnswerImageSerializer
 from api.models import AnswerImage
 
 

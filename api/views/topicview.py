@@ -1,11 +1,10 @@
 from rest_framework import permissions
 from rest_framework.response import Response
-from django.contrib.auth.models import User
 from rest_framework import viewsets
-from api.serializers import UserSerializer, TopicSerializer, QuestionSerializer, AnswerSerializer, MessageSerializer, UserInfoSerializer
 from api.models import Topic, Question, Answer, Message, UserInfo
 from rest_framework.decorators import detail_route, list_route
-from api.serializers import SimTopicSerializer
+from api.serializers.question_serializer import QuestionSerializer
+from api.serializers.topic_serializer import ReturnTopicSerializer, TopicSerializer, SimTopicSerializer
 
 
 class TopicViewSet(viewsets.ModelViewSet):
@@ -13,8 +12,13 @@ class TopicViewSet(viewsets.ModelViewSet):
         话题的展示，创建，更新，检索，删除操作
     """
     queryset = Topic.objects.all()
-    serializer_class = TopicSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get_serializer_class(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            return ReturnTopicSerializer
+        else:
+            return TopicSerializer
 
     # 修改特定信息时用detail_route修饰,访问时使用[@]/[pk]/[function_name]/来使用
     @detail_route()

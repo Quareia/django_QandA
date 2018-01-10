@@ -2,9 +2,11 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from rest_framework import viewsets
-from api.serializers import UserSerializer, TopicSerializer, QuestionSerializer, AnswerSerializer, MessageSerializer, UserInfoSerializer, SimQuestionSerializer
 from api.models import Topic, Question, Answer, Message, UserInfo
 from rest_framework.decorators import detail_route, list_route
+
+from api.serializers.answer_serializer import AnswerSerializer
+from api.serializers.question_serializer import QuestionSerializer, SimQuestionSerializer, ReturnQuestionSerializer
 from api.utils.message_send import MessageSender
 # Create your views here.
 
@@ -15,8 +17,14 @@ class QuestionViewSet(viewsets.ModelViewSet):
     """
     # 需要确保只有问题的提出者才能修改删除
     queryset = Question.objects.all()
-    serializer_class = QuestionSerializer
+    # serializer_class = QuestionSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get_serializer_class(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            return ReturnQuestionSerializer
+        else:
+            return QuestionSerializer
 
     # 用户点击问题详情时增加搜索次数
     @detail_route()

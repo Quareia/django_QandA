@@ -2,12 +2,12 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from rest_framework import viewsets
-from api.serializers import UserSerializer, TopicSerializer, QuestionSerializer, AnswerSerializer, MessageSerializer, UserInfoSerializer
 from api.models import Topic, Question, Answer, Message, UserInfo
 from rest_framework.decorators import detail_route, list_route
 from django.contrib.auth import authenticate, login, logout
 from rest_framework.views import APIView
 # Create your views here.
+from api.serializers.user_serializer import UserInfoSerializer
 
 
 class LogoutView(APIView):

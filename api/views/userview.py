@@ -2,9 +2,12 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from rest_framework import viewsets
-from api.serializers import UserSerializer, UserInfoSerializer, TopicSerializer, QuestionSerializer
 from api.models import UserInfo
 from rest_framework.decorators import detail_route, list_route
+
+from api.serializers.question_serializer import QuestionSerializer
+from api.serializers.topic_serializer import TopicSerializer
+from api.serializers.user_serializer import UserSerializer, UserInfoSerializer
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):

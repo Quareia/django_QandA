@@ -3,10 +3,10 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from rest_framework import viewsets
-from api.serializers import UserSerializer, TopicSerializer, QuestionSerializer
-from api.serializers import AnswerSerializer, MessageSerializer, UserInfoSerializer, AnswerImageSerializer
 from api.models import Topic, Question, Answer, Message, UserInfo, AnswerImage
 from rest_framework.decorators import detail_route, list_route
+
+from api.serializers.answer_serializer import AnswerSerializer, AnswerImageSerializer, ReturnAnswerSerializer
 from api.utils.message_send import MessageSender
 # Create your views here.
 
@@ -17,8 +17,13 @@ class AnswerViewSet(viewsets.ModelViewSet):
     """
     # 需要确保只有问题的回答者才能修改删除回答
     queryset = Answer.objects.all()
-    serializer_class = AnswerSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get_serializer_class(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            return ReturnAnswerSerializer
+        else:
+            return AnswerSerializer
 
     @detail_route(methods=['POST'])
     def upload_image(self, request, pk=None):
