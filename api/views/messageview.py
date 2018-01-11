@@ -2,7 +2,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import viewsets
 from api.models import Message
-from rest_framework.decorators import list_route
+from rest_framework.decorators import list_route, detail_route
 from api.serializers.message_serializer import MessageSerializer
 
 
@@ -19,6 +19,13 @@ class MessageViewSet(viewsets.ModelViewSet):
     # 传递自己的用户名，返回所有发送者为此用户名的消息列表
     # 如果别人发给自己的消息自己删除掉，那么别人也无法看到，
     # 所以需要使用其他的删除方法
+    @detail_route()
+    def is_read(self, request, pk=None):
+        message = Message.objects.get(pk=pk)
+        message.isread = 1
+        message.save()
+        return Response({'msg': 'read success!'})
+
     @list_route()
     def my_send_messages(self, request):
         messages = Message.objects.filter(origin=request.user.id)
@@ -42,3 +49,4 @@ class MessageViewSet(viewsets.ModelViewSet):
 
         serializer = MessageSerializer(messages, many=True)
         return Response(serializer.data)
+

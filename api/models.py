@@ -65,8 +65,6 @@ class Answer(models.Model):
     owner = models.ForeignKey(to=User, related_name='answers', on_delete=models.CASCADE)
     # 回答的内容
     description = models.TextField()
-    # 回答的图片
-    # ansimage = models.ManyToManyField('AnswerImage')
     # 回答点赞
     ansagree = models.IntegerField(default=0)
     # 回答反对
