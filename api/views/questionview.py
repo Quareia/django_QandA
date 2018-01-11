@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import viewsets
 from api.models import Topic, Question, UserInfo
 from rest_framework.decorators import detail_route, list_route
-from api.serializers.answer_serializer import AnswerSerializer
+from api.serializers.answer_serializer import AnswerSerializer, ReturnAnswerSerializer
 from api.serializers.question_serializer import QuestionSerializer, SimQuestionSerializer, ReturnQuestionSerializer
 from api.utils.message_send import MessageSender
 # Create your views here.
@@ -43,10 +43,10 @@ class QuestionViewSet(viewsets.ModelViewSet):
         questions = self.request.user.questions.all().order_by('created',)
         page = self.paginate_queryset(questions)
         if page is not None:
-            serializer = QuestionSerializer(page, many=True)
+            serializer = ReturnQuestionSerializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = QuestionSerializer(questions, many=True)
+        serializer = ReturnQuestionSerializer(questions, many=True)
         return Response(serializer.data)
 
     # 获取当前问题的所有回答
@@ -56,11 +56,11 @@ class QuestionViewSet(viewsets.ModelViewSet):
         answers = question.answers.all()
         page = self.paginate_queryset(answers)
         if page is not None:
-            serializer = AnswerSerializer(page, many=True,
+            serializer = ReturnAnswerSerializer(page, many=True,
                                           context={'request': request})
             return self.get_paginated_response(serializer.data)
 
-        serializer = AnswerSerializer(answers, many=True)
+        serializer = ReturnAnswerSerializer(answers, many=True)
         return Response(serializer.data)
 
     @detail_route()
@@ -101,8 +101,8 @@ class QuestionViewSet(viewsets.ModelViewSet):
             # js传递时使用不同的函数得到的结果不同
             topic = Topic.objects.get(pk=self.request.data['topic'])
             followers = topic.followers.all()
-            sender = MessageSender(followers, 'question ' + str(topic.id))
-            sender.start()
+            # sender = MessageSender(followers, 'question ' + str(topic.id))
+            # sender.start()
         except Topic.DoesNotExist:
             return Response({'status': 'topic does not exist'})
 
@@ -114,12 +114,12 @@ class QuestionViewSet(viewsets.ModelViewSet):
             questions = Question.objects.filter(title__icontains=title)
             page = self.paginate_queryset(questions)
             if page is not None:
-                serializer = QuestionSerializer(page, many=True)
+                serializer = ReturnQuestionSerializer(page, many=True)
                 return self.get_paginated_response(serializer.data)
         return Response({'msg': 'no data'})
 
     @list_route()
     def get_hot_question(self, request):
         questions = Question.objects.order_by('searchtimes')[:10]
-        serializer = SimQuestionSerializer(questions, many=True)
+        serializer = ReturnQuestionSerializer(questions, many=True)
         return Response(serializer.data)

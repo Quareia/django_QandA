@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import viewsets
 from api.models import Topic, Question, Answer, Message, UserInfo
 from rest_framework.decorators import detail_route, list_route
-from api.serializers.question_serializer import QuestionSerializer
+from api.serializers.question_serializer import QuestionSerializer, ReturnQuestionSerializer
 from api.serializers.topic_serializer import ReturnTopicSerializer, TopicSerializer, SimTopicSerializer
 
 
@@ -57,10 +57,10 @@ class TopicViewSet(viewsets.ModelViewSet):
         topics = self.request.user.topics.all()
         page = self.paginate_queryset(topics)
         if page is not None:
-            serializer = TopicSerializer(page, many=True)
+            serializer = ReturnTopicSerializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = TopicSerializer(topics, many=True)
+        serializer = ReturnTopicSerializer(topics, many=True)
         return Response(serializer.data)
 
     def perform_create(self, serializer):
@@ -73,11 +73,10 @@ class TopicViewSet(viewsets.ModelViewSet):
         questions = topic.questions.all()
         page = self.paginate_queryset(questions)
         if page is not None:
-            serializer = QuestionSerializer(page, many=True)
+            serializer = ReturnQuestionSerializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = QuestionSerializer(questions, many=True)
-        return Response(serializer.data)
+        return Response({'msg': 'no data'})
 
     @list_route()
     def search(self, request):
@@ -89,7 +88,7 @@ class TopicViewSet(viewsets.ModelViewSet):
             lists2 = Topic.objects.filter(keywords__icontains=title)
             page = self.paginate_queryset(lists1.union(lists2))
             if page is not None:
-                serializer = TopicSerializer(page, many=True)
+                serializer = ReturnTopicSerializer(page, many=True)
                 return self.get_paginated_response(serializer.data)
         return Response({'msg': 'no data'})
 
@@ -103,5 +102,5 @@ class TopicViewSet(viewsets.ModelViewSet):
     # 根据搜索次数添加热门话题
     def get_hot_topic(self, request):
         topics = Topic.objects.order_by('searchtimes')[:10]
-        serializer = SimTopicSerializer(topics, many=True)
+        serializer = ReturnTopicSerializer(topics, many=True)
         return Response(serializer.data)

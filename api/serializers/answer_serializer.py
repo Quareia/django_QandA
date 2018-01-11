@@ -1,21 +1,16 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
-from api.models import Topic, Question, Answer, Message, UserInfo, AnswerImage
+from api.models import Question, Answer, AnswerImage
+from api.serializers.question_serializer import SimQuestionSerializer
 from api.serializers.user_serializer import SimUserSerializer
 
 
 class ReturnAnswerSerializer(serializers.ModelSerializer):
     owner = SimUserSerializer()
-    ansto = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
-    ansimage = serializers.HyperlinkedRelatedField(
-        many=True,
-        read_only=True,
-        view_name='answerimage-detail'
-    )
+    ansto = SimQuestionSerializer()
 
     class Meta:
         model = Answer
-        fields = ('id', 'ansto', 'owner', 'description', 'ansimage', 'created',
+        fields = ('id', 'ansto', 'owner', 'description', 'created',
                   'ansagree', 'ansagainst', 'keep')
 
 
