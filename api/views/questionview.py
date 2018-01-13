@@ -53,6 +53,8 @@ class QuestionViewSet(viewsets.ModelViewSet):
     @detail_route()
     def get_answers(self, request, pk=None):
         question = Question.objects.get(pk=pk)
+        question.searchtimes = question.searchtimes + 1
+        question.save()
         answers = question.answers.all()
         page = self.paginate_queryset(answers)
         if page is not None:
@@ -101,8 +103,8 @@ class QuestionViewSet(viewsets.ModelViewSet):
             # js传递时使用不同的函数得到的结果不同
             topic = Topic.objects.get(pk=self.request.data['topic'])
             followers = topic.followers.all()
-            # sender = MessageSender(followers, 'question ' + str(topic.id))
-            # sender.start()
+            sender = MessageSender(followers, 'topic ' + str(topic.title))
+            sender.start()
         except Topic.DoesNotExist:
             return Response({'status': 'topic does not exist'})
 
@@ -120,6 +122,8 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
     @list_route()
     def get_hot_question(self, request):
-        questions = Question.objects.order_by('searchtimes')[:10]
-        serializer = ReturnQuestionSerializer(questions, many=True)
-        return Response(serializer.data)
+        questions = Question.objects.order_by('-searchtimes')[:10]
+        page = self.paginate_queryset(questions)
+        if page is not None:
+            serializer = ReturnQuestionSerializer(questions, many=True)
+            return self.get_paginated_response(serializer.data)

@@ -78,12 +78,11 @@ class AnswerViewSet(viewsets.ModelViewSet):
         else:
             return 1
         try:
-            # js append become list
             question = Question.objects.get(pk=self.request.data['ansto'])
             info = UserInfo.objects.filter(owner=self.request.user)[0]
             followers = question.followers.all()
-            # sender = MessageSender(followers, 'question ' + str(question.id))
-            # sender.start()
+            sender = MessageSender(followers, 'question ' + str(question.title))
+            sender.start()
             question.followers.add(self.request.user.info)
             info.followquestions.add(question)
             question.save()

@@ -5,9 +5,9 @@ from rest_framework import viewsets
 from api.models import UserInfo
 from rest_framework.decorators import detail_route, list_route
 
-from api.serializers.question_serializer import QuestionSerializer
+from api.serializers.question_serializer import QuestionSerializer, ReturnQuestionSerializer
 from api.serializers.topic_serializer import TopicSerializer
-from api.serializers.user_serializer import UserSerializer, UserInfoSerializer
+from api.serializers.user_serializer import UserSerializer, UserInfoSerializer, SimUserSerializer
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -17,8 +17,6 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    # 只有经过认证的用户才能访问用户列表
-    # 只有用户本人才能访问自己的信息,应该增加认证的类
     permission_classes = (permissions.IsAuthenticated, )
 
     @detail_route()
@@ -30,6 +28,12 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = UserInfoSerializer(info)
         return Response(serializer.data)
 
+    @list_route()
+    def get_sel_user(self, request):
+        users = User.objects.all()
+        serializer = SimUserSerializer(users, many=True)
+        return Response(serializer.data)
+
 
 class UserInfoViewSet(viewsets.ModelViewSet):
     """
@@ -37,7 +41,6 @@ class UserInfoViewSet(viewsets.ModelViewSet):
     """
     queryset = UserInfo.objects.all()
     serializer_class = UserInfoSerializer
-    # 只有用户本人才能访问自己的信息，并进行修改，需要增加认证类
     permission_classes = (permissions.IsAuthenticated, )
 
     def perform_create(self, serializer):
@@ -67,8 +70,8 @@ class UserInfoViewSet(viewsets.ModelViewSet):
         questions = info.followquestions.all()
         page = self.paginate_queryset(questions)
         if page is not None:
-            serializer = QuestionSerializer(page, many=True)
+            serializer = ReturnQuestionSerializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = QuestionSerializer(questions, many=True)
+        serializer = ReturnQuestionSerializer(questions, many=True)
         return Response(serializer.data)

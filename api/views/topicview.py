@@ -1,9 +1,9 @@
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework import viewsets
-from api.models import Topic, Question, Answer, Message, UserInfo
+from api.models import Topic, UserInfo
 from rest_framework.decorators import detail_route, list_route
-from api.serializers.question_serializer import QuestionSerializer, ReturnQuestionSerializer
+from api.serializers.question_serializer import ReturnQuestionSerializer
 from api.serializers.topic_serializer import ReturnTopicSerializer, TopicSerializer, SimTopicSerializer
 
 
