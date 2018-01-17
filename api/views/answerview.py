@@ -59,30 +59,21 @@ class AnswerViewSet(viewsets.ModelViewSet):
         serializer = ReturnAnswerSerializer(answers, many=True)
         return Response(serializer.data)
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        if(self.perform_create(serializer) == 1):
-            return Response({'msg': '您已经回答过此问题', 'status': 0})
-        else:
-            headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=201, headers=headers)
 
     # 模型的外键需要自己添加
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
-        if Answer.objects.filter(keep=self.request.user.username +
-                                 str(self.request.data['ansto'])).count() == 0:
-            serializer.save(keep=self.request.user.username +
-                                 str(self.request.data['ansto']))
-        else:
-            return 1
         try:
             question = Question.objects.get(pk=self.request.data['ansto'])
             info = UserInfo.objects.filter(owner=self.request.user)[0]
             followers = question.followers.all()
-            sender = MessageSender(followers, 'question ' + str(question.title))
-            sender.start()
+            # sender = MessageSender(followers, '问题 ' + str(question.title))
+            # sender.start()
+            for item in followers:
+                message = Message.objects.create(destination=item.id,
+                                                 content='问题 ' + str(question.title) + ' 有新的回答',
+                                                 type=1)
+                message.save()
             question.followers.add(self.request.user.info)
             info.followquestions.add(question)
             question.save()

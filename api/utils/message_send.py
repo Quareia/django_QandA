@@ -12,6 +12,6 @@ class MessageSender(Thread):
     def run(self):
         for item in self.followers:
             message = Message.objects.create(destination=item.id,
-                                             content=self.resource + ' update',
+                                             content=self.resource + ' 有新的回答',
                                              type=1)
             message.save()
