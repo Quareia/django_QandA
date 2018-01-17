@@ -1,3 +1,4 @@
+# -*- coding=utf-8 -*-
 from rest_framework.routers import DefaultRouter
 from api.views.userview import UserViewSet, UserInfoViewSet
 from api.views.topicview import TopicViewSet

@@ -1,3 +1,4 @@
+# -*- coding=utf-8 -*-
 from rest_framework.test import APITestCase
 from api.models import Question, UserInfo, Topic
 from django.contrib.auth.models import User
