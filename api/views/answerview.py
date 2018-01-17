@@ -1,4 +1,4 @@
-from django.views.decorators.csrf import csrf_exempt
+import time
 from rest_framework import permissions
 from rest_framework.response import Response
 from django.contrib.auth.models import User
@@ -59,7 +59,6 @@ class AnswerViewSet(viewsets.ModelViewSet):
         serializer = ReturnAnswerSerializer(answers, many=True)
         return Response(serializer.data)
 
-
     # 模型的外键需要自己添加
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -72,6 +71,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
             for item in followers:
                 message = Message.objects.create(destination=item.id,
                                                  content='问题 ' + str(question.title) + ' 有新的回答',
+
                                                  type=1)
                 message.save()
             question.followers.add(self.request.user.info)
