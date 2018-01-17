@@ -6,6 +6,7 @@ from rest_framework.decorators import detail_route, list_route
 from api.serializers.answer_serializer import AnswerSerializer, ReturnAnswerSerializer
 from api.serializers.question_serializer import QuestionSerializer, SimQuestionSerializer, ReturnQuestionSerializer
 from api.utils.message_send import MessageSender
+from api.cache.HotCache import cache
 # Create your views here.
 
 
@@ -29,6 +30,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def add_search_times(self, request, pk=None):
         try:
             question = Question.objects.get(pk=pk)
+            cache.add_item(question)
             question.searchtimes = question.searchtimes + 1
             question.save()
             return Response({'msg': 'add search time successful'})
@@ -53,6 +55,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     @detail_route()
     def get_answers(self, request, pk=None):
         question = Question.objects.get(pk=pk)
+        cache.add_item(question)
         question.searchtimes = question.searchtimes + 1
         question.save()
         answers = question.answers.all()
@@ -99,14 +102,14 @@ class QuestionViewSet(viewsets.ModelViewSet):
     # 通过消息来传送
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
-        try:
-            # js传递时使用不同的函数得到的结果不同
-            topic = Topic.objects.get(pk=self.request.data['topic'])
-            followers = topic.followers.all()
-            sender = MessageSender(followers, 'topic ' + str(topic.title))
-            sender.start()
-        except Topic.DoesNotExist:
-            return Response({'status': 'topic does not exist'})
+        # try:
+        #     # js传递时使用不同的函数得到的结果不同
+        #     topic = Topic.objects.get(pk=self.request.data['topic'])
+        #     # followers = topic.followers.all()
+        #     # sender = MessageSender(followers, 'topic ' + str(topic.title))
+        #     # sender.start()
+        # except Topic.DoesNotExist:
+        #     return Response({'status': 'topic does not exist'})
 
     @list_route()
     def search(self, request):
@@ -122,7 +125,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
 
     @list_route()
     def get_hot_question(self, request):
-        questions = Question.objects.order_by('-searchtimes')[:10]
+        questions = cache.get_all()[:10]
         page = self.paginate_queryset(questions)
         if page is not None:
             serializer = ReturnQuestionSerializer(questions, many=True)
