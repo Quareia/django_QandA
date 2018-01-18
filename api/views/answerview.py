@@ -66,14 +66,9 @@ class AnswerViewSet(viewsets.ModelViewSet):
             question = Question.objects.get(pk=self.request.data['ansto'])
             info = UserInfo.objects.filter(owner=self.request.user)[0]
             followers = question.followers.all()
-            # sender = MessageSender(followers, '问题 ' + str(question.title))
-            # sender.start()
-            for item in followers:
-                message = Message.objects.create(destination=item.id,
-                                                 content='问题 ' + str(question.title) + ' 有新的回答',
-
-                                                 type=1)
-                message.save()
+            # 异步消息发送
+            sender = MessageSender(followers, '问题 ' + str(question.title))
+            sender.start()
             question.followers.add(self.request.user.info)
             info.followquestions.add(question)
             question.save()

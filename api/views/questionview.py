@@ -103,14 +103,6 @@ class QuestionViewSet(viewsets.ModelViewSet):
     # 通过消息来传送
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
-        # try:
-        #     # js传递时使用不同的函数得到的结果不同
-        #     topic = Topic.objects.get(pk=self.request.data['topic'])
-        #     # followers = topic.followers.all()
-        #     # sender = MessageSender(followers, 'topic ' + str(topic.title))
-        #     # sender.start()
-        # except Topic.DoesNotExist:
-        #     return Response({'status': 'topic does not exist'})
 
     @list_route()
     def search(self, request):
